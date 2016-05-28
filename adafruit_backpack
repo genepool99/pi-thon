@@ -1,0 +1,52 @@
+import time
+import collections
+import thread
+
+from Adafruit_LED_Backpack import AlphaNum4
+from Adafruit_LED_Backpack import SevenSegment
+
+# Setup 14 segment and 7 segment adafruit displays. You may have to change the i2c address/bus numbers
+alphad = AlphaNum4.AlphaNum4(address=0x71, busnum=0)
+numd = SevenSegment.SevenSegment(address=0x70, busnum=0)
+alphad.begin()
+numd.begin()
+
+def printAlpha(message, sec, display):
+    """ print a message to the 14-segment display for a number of seconds """
+    pos = 0
+    t_end = time.time() + sec
+    while time.time() < t_end:
+        display.clear()
+        display.print_str(message[pos:pos+4])
+        display.write_display()
+        pos += 1
+        if pos > len(message)-4:
+            pos = 0
+        # Delay for half a second.
+        time.sleep(0.5)
+    display.clear()
+
+tests = collections.OrderedDict()
+tests["...TEST1......."]=1
+tests["...TEST2......."]=2
+tests["...TEST3......."]=3
+tests["...TEST4......."]=4     
+
+numd.clear()
+numd.write_display()
+alphad.clear()
+alphad.write_display()
+
+printAlpha("....Starting Up.........", 10, alphad)
+
+for test, value in tests.items():
+    numd.clear()
+    numd.print_float(int(value), decimal_digits=0, justify_right=True)
+    numd.set_colon(False)
+    numd.write_display()
+    printAlpha(test, 10, alphad)
+
+numd.clear()
+numd.write_display()
+alphad.clear()
+alphad.write_display()
